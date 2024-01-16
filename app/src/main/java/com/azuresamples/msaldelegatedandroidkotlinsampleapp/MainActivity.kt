@@ -6,11 +6,13 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.azuresamples.msaldelegatedandroidkotlinsampleapp.databinding.ActivityMainBinding
 import com.microsoft.identity.client.AcquireTokenParameters
+import com.microsoft.identity.client.AcquireTokenSilentParameters
 import com.microsoft.identity.client.AuthenticationCallback
 import com.microsoft.identity.client.IAccount
 import com.microsoft.identity.client.IAuthenticationResult
 import com.microsoft.identity.client.IMultipleAccountPublicClientApplication
 import com.microsoft.identity.client.PublicClientApplication
+import com.microsoft.identity.client.SilentAuthenticationCallback
 import com.microsoft.identity.client.exception.MsalException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +21,7 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var authClient: IMultipleAccountPublicClientApplication
+    private lateinit var accountList: List<IAccount>
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
@@ -34,8 +37,8 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.Main).launch {
             authClient = initClient()
-            val accounts = getAccounts()
-            updateUI(accounts)
+            accountList = getAccounts()
+            updateUI(accountList)
         }
 
         init()
@@ -60,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun acquireTokenInteractively() {
-        val scopes = binding.scope.text.toString().lowercase().split(" ");
+        val scopes = binding.scope.text.toString().lowercase().split(" ")
         authClient.acquireToken(AcquireTokenParameters(
             AcquireTokenParameters.Builder()
                 .startAuthorizationFromActivity(this@MainActivity)
@@ -70,11 +73,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun acquireTokenSilently() {
+        val scopes = binding.scope.text.toString().lowercase().split(" ")
 
+        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
+
+        authClient.acquireTokenSilent(AcquireTokenSilentParameters(
+            AcquireTokenSilentParameters.Builder()
+                .forAccount(selectedAccount)
+                .fromAuthority(selectedAccount.getAuthority())
+                .withScopes(scopes)
+                .forceRefresh(false)
+                .withCallback(getAuthSilentCallback())
+        ))
     }
 
     private fun removeAccount() {
-
+        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
+        authClient.removeAccount(selectedAccount, removeAccountCallback())
     }
 
     private fun getAuthInteractiveCallback(): AuthenticationCallback {
@@ -89,8 +104,8 @@ class MainActivity : AppCompatActivity() {
 
                 /* Reload account asynchronously to get the up-to-date list. */
                 CoroutineScope(Dispatchers.Main).launch {
-                    val accounts = getAccounts()
-                    updateUI(accounts)
+                    accountList = getAccounts()
+                    updateUI(accountList)
                 }
             }
 
@@ -105,6 +120,32 @@ class MainActivity : AppCompatActivity() {
                 // Do nothing
             }
         }
+    }
+
+    private fun getAuthSilentCallback(): SilentAuthenticationCallback {
+        return object : SilentAuthenticationCallback {
+            override fun onSuccess(authenticationResult: IAuthenticationResult?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onError(exception: MsalException?) {
+                TODO("Not yet implemented")
+            }
+
+        }
+    }
+
+    private fun removeAccountCallback(): IMultipleAccountPublicClientApplication.RemoveAccountCallback {
+        return object : IMultipleAccountPublicClientApplication.RemoveAccountCallback {
+            override fun onRemoved() {
+                TODO("Not yet implemented")
+            }
+
+            override fun onError(exception: MsalException) {
+                TODO("Not yet implemented")
+            }
+        }
+
     }
 
     private suspend fun initClient(): IMultipleAccountPublicClientApplication = withContext(Dispatchers.IO) {
