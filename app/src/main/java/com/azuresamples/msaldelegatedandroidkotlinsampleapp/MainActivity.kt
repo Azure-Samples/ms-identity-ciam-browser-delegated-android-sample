@@ -3,6 +3,7 @@ package com.azuresamples.msaldelegatedandroidkotlinsampleapp
 import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.azuresamples.msaldelegatedandroidkotlinsampleapp.databinding.ActivityMainBinding
 import com.microsoft.identity.client.AcquireTokenParameters
@@ -64,6 +65,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun acquireTokenInteractively() {
         val scopes = binding.scope.text.toString().lowercase().split(" ")
+
+        binding.txtLog.text = ""
+
         authClient.acquireToken(AcquireTokenParameters(
             AcquireTokenParameters.Builder()
                 .startAuthorizationFromActivity(this@MainActivity)
@@ -74,13 +78,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun acquireTokenSilently() {
         val scopes = binding.scope.text.toString().lowercase().split(" ")
-
         val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
 
-        authClient.acquireTokenSilent(AcquireTokenSilentParameters(
+        binding.txtLog.text = ""
+
+        authClient.acquireTokenSilentAsync(AcquireTokenSilentParameters(
             AcquireTokenSilentParameters.Builder()
                 .forAccount(selectedAccount)
-                .fromAuthority(selectedAccount.getAuthority())
+                .fromAuthority(selectedAccount.authority)
                 .withScopes(scopes)
                 .forceRefresh(false)
                 .withCallback(getAuthSilentCallback())
@@ -89,6 +94,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun removeAccount() {
         val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
+
+        binding.txtLog.text = ""
+
         authClient.removeAccount(selectedAccount, removeAccountCallback())
     }
 
@@ -100,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Successfully authenticated")
                 Log.d(TAG, "ID Token: " + authenticationResult.account.claims?.get("id_token"))
 
-                binding.txtLog.text = "Interactive Request Success:\n $authenticationResult.getAccessToken()"
+                binding.txtLog.text = "Interactive Request Success:\n" + authenticationResult?.accessToken
 
                 /* Reload account asynchronously to get the up-to-date list. */
                 CoroutineScope(Dispatchers.Main).launch {
@@ -113,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                 /* Failed to acquireToken */
                 Log.d(TAG, "Authentication failed: $exception")
 
-                binding.txtLog.text = "Authentication failed: $exception"
+                binding.txtLog.text = "Authentication failed:" + exception
             }
 
             override fun onCancel() {
@@ -125,11 +133,16 @@ class MainActivity : AppCompatActivity() {
     private fun getAuthSilentCallback(): SilentAuthenticationCallback {
         return object : SilentAuthenticationCallback {
             override fun onSuccess(authenticationResult: IAuthenticationResult?) {
-                TODO("Not yet implemented")
+                Log.d(TAG, "Successfully authenticated")
+
+                binding.txtLog.text = "Silent Request Success:\n" + authenticationResult?.accessToken
             }
 
             override fun onError(exception: MsalException?) {
-                TODO("Not yet implemented")
+                /* Failed to acquireToken */
+                Log.d(TAG, "Authentication failed: $exception")
+
+                binding.txtLog.text = "Authentication failed: $exception"
             }
 
         }
@@ -138,11 +151,16 @@ class MainActivity : AppCompatActivity() {
     private fun removeAccountCallback(): IMultipleAccountPublicClientApplication.RemoveAccountCallback {
         return object : IMultipleAccountPublicClientApplication.RemoveAccountCallback {
             override fun onRemoved() {
-                TODO("Not yet implemented")
+                Toast.makeText(this@MainActivity, "Account removed.", Toast.LENGTH_SHORT).show()
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    accountList = getAccounts()
+                    updateUI(accountList)
+                }
             }
 
             override fun onError(exception: MsalException) {
-                TODO("Not yet implemented")
+                binding.txtLog.text = "MSAL Exception:" + exception
             }
         }
 

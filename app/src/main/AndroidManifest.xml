@@ -43,8 +43,8 @@
                     note that the leading "/" is required for android:path
                 -->
                 <data
-                    android:host="com.azuresamples.msalandroidapp"
-                    android:path="/1wIqXSqBj7w+h11ZifsnqwgyKrY="
+                    android:host="com.azuresamples.msaldelegatedandroidkotlinsampleapp"
+                    android:path="/Vpzmn3coVuKS1oWliKEVaOvzLiU="
                     android:scheme="msauth" />
             </intent-filter>
         </activity>
