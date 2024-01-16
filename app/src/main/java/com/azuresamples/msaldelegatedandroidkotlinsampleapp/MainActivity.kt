@@ -47,14 +47,6 @@ class MainActivity : AppCompatActivity() {
         initializeButtonListeners()
     }
 
-    override fun onResume() {
-        super.onResume()
-        CoroutineScope(Dispatchers.Main).launch {
-            accountList = getAccounts()
-            updateUI(accountList)
-        }
-    }
-
     private fun initializeButtonListeners() {
         binding.btnAcquireTokenInteractively.setOnClickListener {
             acquireTokenInteractively()
@@ -115,16 +107,17 @@ class MainActivity : AppCompatActivity() {
             binding.txtLog.text = ""
             try {
                 if (WEB_API_BASE_URL.isBlank()) {
-                    Toast.makeText(this@MainActivity, "Please set the WEB_API_BASE_URL constant to the URL of your web API.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, getString(R.string.message_web_base_url), Toast.LENGTH_LONG).show()
                     return@launch
                 }
                 val apiResponseCode = withContext(Dispatchers.IO) {
                     ApiClient.performGetApiRequest(WEB_API_BASE_URL, accessToken)
                 }
-                binding.txtLog.text = "API response code is:"  + apiResponseCode
-            } catch (e: Exception) {
-                Log.d(TAG, "Exception at accessing web API: $e")
-                binding.txtLog.text = "Exception at accessing web API:" + e
+                binding.txtLog.text = getString(R.string.log_web_api_response)  + apiResponseCode
+            } catch (exception: Exception) {
+                Log.d(TAG, "Exception at accessing web API: $exception")
+
+                binding.txtLog.text = getString(R.string.exception_web_api) + exception
             }
         }
     }
@@ -133,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         return object : AuthenticationCallback {
 
             override fun onSuccess(authenticationResult: IAuthenticationResult) {
-                /* Successfully got a token, use it to call a protected resource - MSGraph */
+                /* Successfully got a token, use it to call a protected resource - Web API */
                 Log.d(TAG, "Successfully authenticated")
                 Log.d(TAG, "ID Token: " + authenticationResult.account.claims?.get("id_token"))
 
@@ -143,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                     accountList = getAccounts()
 
                     updateUI(accountList)
-                    binding.txtLog.text = "Interactive Request Success:\n" +  accessToken
+                    binding.txtLog.text = getString(R.string.log_token_interactive) +  accessToken
                 }
             }
 
@@ -152,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Authentication failed: $exception")
 
                 accessToken = null
-                binding.txtLog.text = "Authentication failed:" + exception
+                binding.txtLog.text = getString(R.string.exception_authentication) + exception
             }
 
             override fun onCancel() {
@@ -167,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Successfully authenticated")
 
                 accessToken = authenticationResult?.accessToken
-                binding.txtLog.text = "Silent Request Success:\n" + accessToken
+                binding.txtLog.text = getString(R.string.log_token_silent) + accessToken
             }
 
             override fun onError(exception: MsalException?) {
@@ -175,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Authentication failed: $exception")
 
                 accessToken = null
-                binding.txtLog.text = "Authentication failed: $exception"
+                binding.txtLog.text = getString(R.string.exception_authentication) + exception
             }
 
         }
@@ -189,13 +182,13 @@ class MainActivity : AppCompatActivity() {
                     accountList = getAccounts()
 
                     updateUI(accountList)
-                    Toast.makeText(this@MainActivity, "Account removed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, getString(R.string.exception_remove_account), Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onError(exception: MsalException) {
                 accessToken = null
-                binding.txtLog.text = "MSAL Exception:" + exception
+                binding.txtLog.text = getString(R.string.exception_remove_account) + exception
             }
         }
 
@@ -226,7 +219,7 @@ class MainActivity : AppCompatActivity() {
 
         val dataAdapter = ArrayAdapter(
             this, android.R.layout.simple_spinner_item,
-            accounts.mapNotNull { it.username }.toMutableList()
+            accounts.map { it.username }.toMutableList()
         )
 
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
