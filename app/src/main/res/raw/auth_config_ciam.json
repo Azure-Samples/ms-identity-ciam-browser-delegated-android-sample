@@ -1,0 +1,13 @@
+{
+  "client_id" : "CLIENT_ID",
+  "authorization_user_agent" : "DEFAULT",
+  "redirect_uri" : "msauth://com.azuresamples.msalandroidapp/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
+  "account_mode" : "MULTIPLE",
+  "broker_redirect_uri_registered": true,
+  "authorities" : [
+    {
+      "type": "CIAM",
+      "authority_url": "https://TENANT_NAME.ciamlogin.com/TENANT_NAME.onmicrosoft.com/"
+    }
+  ]
+}

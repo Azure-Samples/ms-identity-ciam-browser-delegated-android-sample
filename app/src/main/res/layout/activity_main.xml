@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
 
     <LinearLayout
         android:id ="@+id/scope_layout"
@@ -36,14 +35,14 @@
                 android:id="@+id/scope"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
+                android:minHeight="@dimen/dimens_48dp"
                 android:text="user.read"
                 android:textSize="12sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
+                android:paddingLeft="@dimen/dimens_5dp"
                 android:text="Type in scopes delimited by space"
                 android:textSize="10sp" />
 
@@ -74,7 +73,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="7"
-            android:minHeight="48dp"
+            android:minHeight="@dimen/dimens_48dp"
             android:spinnerMode="dropdown" />
     </LinearLayout>
 
@@ -113,13 +112,13 @@
         android:text="Remove Account"
         app:layout_constraintTop_toBottomOf="@id/token_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constratinStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/txt_log"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="@dimen/dimens_20dp"
         android:layout_weight="0.8"
         android:text="Output goes here..."
         app:layout_constraintTop_toBottomOf="@id/btn_removeAccount" />
