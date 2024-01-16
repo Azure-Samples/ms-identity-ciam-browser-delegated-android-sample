@@ -120,6 +120,17 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <Button
+            android:id="@+id/btn_accessApi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:gravity="center"
+            android:text="API - Perform GET"
+            app:layout_constraintTop_toBottomOf="@id/btn_removeAccount"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
         <TextView
             android:id="@+id/txt_log"
             android:layout_width="match_parent"
@@ -127,6 +138,6 @@
             android:layout_marginTop="@dimen/dimens_20dp"
             android:layout_weight="0.8"
             android:text="Output goes here..."
-            app:layout_constraintTop_toBottomOf="@id/btn_removeAccount" />
+            app:layout_constraintTop_toBottomOf="@id/btn_accessApi" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

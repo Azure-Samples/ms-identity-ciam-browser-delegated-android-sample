@@ -23,11 +23,13 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
     private lateinit var authClient: IMultipleAccountPublicClientApplication
     private lateinit var accountList: List<IAccount>
+    private var accessToken: String? = null
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
     companion object {
         private val TAG = MainActivity::class.java.simpleName
+        private const val WEB_API_BASE_URL = "" // Developers should set the respective URL of their web API here
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,11 +44,15 @@ class MainActivity : AppCompatActivity() {
             updateUI(accountList)
         }
 
-        init()
+        initializeButtonListeners()
     }
 
-    private fun init() {
-        initializeButtonListeners()
+    override fun onResume() {
+        super.onResume()
+        CoroutineScope(Dispatchers.Main).launch {
+            accountList = getAccounts()
+            updateUI(accountList)
+        }
     }
 
     private fun initializeButtonListeners() {
@@ -60,6 +66,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnRemoveAccount.setOnClickListener {
             removeAccount()
+        }
+
+        binding.btnAccessApi.setOnClickListener {
+            accessWebApi()
         }
     }
 
@@ -100,6 +110,25 @@ class MainActivity : AppCompatActivity() {
         authClient.removeAccount(selectedAccount, removeAccountCallback())
     }
 
+    private fun accessWebApi() {
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.txtLog.text = ""
+            try {
+                if (WEB_API_BASE_URL.isBlank()) {
+                    Toast.makeText(this@MainActivity, "Please set the WEB_API_BASE_URL constant to the URL of your web API.", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                val apiResponseCode = withContext(Dispatchers.IO) {
+                    ApiClient.performGetApiRequest(WEB_API_BASE_URL, accessToken)
+                }
+                binding.txtLog.text = "API response code is:"  + apiResponseCode
+            } catch (e: Exception) {
+                Log.d(TAG, "Exception at accessing web API: $e")
+                binding.txtLog.text = "Exception at accessing web API:" + e
+            }
+        }
+    }
+
     private fun getAuthInteractiveCallback(): AuthenticationCallback {
         return object : AuthenticationCallback {
 
@@ -108,12 +137,13 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Successfully authenticated")
                 Log.d(TAG, "ID Token: " + authenticationResult.account.claims?.get("id_token"))
 
-                binding.txtLog.text = "Interactive Request Success:\n" + authenticationResult?.accessToken
-
                 /* Reload account asynchronously to get the up-to-date list. */
                 CoroutineScope(Dispatchers.Main).launch {
+                    accessToken = authenticationResult.accessToken
                     accountList = getAccounts()
+
                     updateUI(accountList)
+                    binding.txtLog.text = "Interactive Request Success:\n" +  accessToken
                 }
             }
 
@@ -121,6 +151,7 @@ class MainActivity : AppCompatActivity() {
                 /* Failed to acquireToken */
                 Log.d(TAG, "Authentication failed: $exception")
 
+                accessToken = null
                 binding.txtLog.text = "Authentication failed:" + exception
             }
 
@@ -135,13 +166,15 @@ class MainActivity : AppCompatActivity() {
             override fun onSuccess(authenticationResult: IAuthenticationResult?) {
                 Log.d(TAG, "Successfully authenticated")
 
-                binding.txtLog.text = "Silent Request Success:\n" + authenticationResult?.accessToken
+                accessToken = authenticationResult?.accessToken
+                binding.txtLog.text = "Silent Request Success:\n" + accessToken
             }
 
             override fun onError(exception: MsalException?) {
                 /* Failed to acquireToken */
                 Log.d(TAG, "Authentication failed: $exception")
 
+                accessToken = null
                 binding.txtLog.text = "Authentication failed: $exception"
             }
 
@@ -151,15 +184,17 @@ class MainActivity : AppCompatActivity() {
     private fun removeAccountCallback(): IMultipleAccountPublicClientApplication.RemoveAccountCallback {
         return object : IMultipleAccountPublicClientApplication.RemoveAccountCallback {
             override fun onRemoved() {
-                Toast.makeText(this@MainActivity, "Account removed.", Toast.LENGTH_SHORT).show()
-
                 CoroutineScope(Dispatchers.Main).launch {
+                    accessToken = null
                     accountList = getAccounts()
+
                     updateUI(accountList)
+                    Toast.makeText(this@MainActivity, "Account removed.", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onError(exception: MsalException) {
+                accessToken = null
                 binding.txtLog.text = "MSAL Exception:" + exception
             }
         }
@@ -179,10 +214,12 @@ class MainActivity : AppCompatActivity() {
     private fun updateUI(accounts : List<IAccount>) {
         if (accounts.isNotEmpty()) {
             binding.btnRemoveAccount.isEnabled = true
+            binding.btnAccessApi.isEnabled = true
             binding.btnAcquireTokenSilently.isEnabled = true
             binding.btnAcquireTokenInteractively.isEnabled = true
         } else {
             binding.btnRemoveAccount.isEnabled = false
+            binding.btnAccessApi.isEnabled = false
             binding.btnAcquireTokenSilently.isEnabled = true
             binding.btnAcquireTokenInteractively.isEnabled = true
         }
