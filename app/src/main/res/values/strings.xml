@@ -2,14 +2,14 @@
     <string name="app_title">CIAM Browser Delegated Sample</string>
     <string name="app_name">CIAM Browser Delegated Sample</string>
 
-    <string name="message_web_base_url">"Please set the WEB_API_BASE_URL constant to the URL of your web API."</string>
+    <string name="message_web_base_url">Please set the WEB_API_BASE_URL constant to the URL of your web API.</string>
 
-    <string name="log_web_api_response">"API response code is:"</string>
-    <string name="log_token_interactive">"Interactive Request Success:\n"</string>
-    <string name="log_token_silent">"Silent Request Success:\n"</string>
-    <string name="log_remove_account">"Account removed."</string>
+    <string name="log_web_api_response">API response code is:</string>
+    <string name="log_token_interactive">Interactive Request Success:\n</string>
+    <string name="log_token_silent">Silent Request Success:\n</string>
+    <string name="log_remove_account">Account removed.</string>
 
-    <string name="exception_web_api">"Exception at accessing web API:"</string>
-    <string name="exception_authentication">"Authentication failed:"</string>
-    <string name="exception_remove_account">"MSAL Exception:"</string>
+    <string name="exception_web_api">Exception at accessing web API:</string>
+    <string name="exception_authentication">Authentication failed:</string>
+    <string name="exception_remove_account">MSAL Exception:</string>
 </resources>

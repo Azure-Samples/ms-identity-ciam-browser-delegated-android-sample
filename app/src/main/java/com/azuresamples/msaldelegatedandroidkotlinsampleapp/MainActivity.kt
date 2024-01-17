@@ -66,38 +66,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun acquireTokenInteractively() {
-        val scopes = binding.scope.text.toString().lowercase().split(" ")
-
         binding.txtLog.text = ""
 
-        authClient.acquireToken(AcquireTokenParameters(
-            AcquireTokenParameters.Builder()
-                .startAuthorizationFromActivity(this@MainActivity)
-                .withScopes(scopes)
-                .withCallback(getAuthInteractiveCallback())
-        ))
+        val scopes = binding.scope.text.toString().lowercase().split(" ")
+        val parameters = AcquireTokenParameters.Builder()
+            .startAuthorizationFromActivity(this@MainActivity)
+            .withScopes(scopes)
+            .withCallback(getAuthInteractiveCallback())
+            .build()
+
+        authClient.acquireToken(parameters)
     }
 
     private fun acquireTokenSilently() {
-        val scopes = binding.scope.text.toString().lowercase().split(" ")
-        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
-
         binding.txtLog.text = ""
 
-        authClient.acquireTokenSilentAsync(AcquireTokenSilentParameters(
-            AcquireTokenSilentParameters.Builder()
-                .forAccount(selectedAccount)
-                .fromAuthority(selectedAccount.authority)
-                .withScopes(scopes)
-                .forceRefresh(false)
-                .withCallback(getAuthSilentCallback())
-        ))
+        val scopes = binding.scope.text.toString().lowercase().split(" ")
+        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
+        val parameters = AcquireTokenSilentParameters.Builder()
+            .forAccount(selectedAccount)
+            .fromAuthority(selectedAccount.authority)
+            .withScopes(scopes)
+            .forceRefresh(false)
+            .withCallback(getAuthSilentCallback())
+            .build()
+
+        authClient.acquireTokenSilentAsync(parameters)
     }
 
     private fun removeAccount() {
-        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
-
         binding.txtLog.text = ""
+
+        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
 
         authClient.removeAccount(selectedAccount, removeAccountCallback())
     }
