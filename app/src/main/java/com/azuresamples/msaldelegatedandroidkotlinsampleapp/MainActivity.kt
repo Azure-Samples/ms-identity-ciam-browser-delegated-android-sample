@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
      *
      * Some example scenarios are
      *  - password change
-     *  - the resource you're acquiring a token for has a stricter set of requirement than your SSO refresh token.
      *  - you're introducing a new scope which the user has never consented for.
      */
     private fun acquireTokenInteractively() {
@@ -100,7 +99,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Performs acquireToken without interrupting the user.
+     * Performs acquireToken in the background without additional user interaction.
      *
      * This requires an account object of the account you're obtaining a token for.
      * (can be obtained via getAccount()).
@@ -133,6 +132,10 @@ class MainActivity : AppCompatActivity() {
         authClient.removeAccount(selectedAccount, removeAccountCallback())
     }
 
+
+    /**
+     * Use the access token authenticated from Azure to access the Web API service that the developer configured himself.
+     */
     private fun accessWebApi() {
         CoroutineScope(Dispatchers.Main).launch {
             binding.txtLog.text = ""
@@ -274,12 +277,10 @@ class MainActivity : AppCompatActivity() {
         return@withContext authClient.accounts
     }
 
-    //
-    // Helper methods manage UI updates
-    // ================================
-    // updateUI() - Updates UI based on account list
-    //
-
+    /**
+     * Helper methods manage UI updates
+     * updateUI() - Updates UI based on account list
+     */
     private fun updateUI(accounts : List<IAccount>) {
         if (accounts.isNotEmpty()) {
             binding.btnRemoveAccount.isEnabled = true
