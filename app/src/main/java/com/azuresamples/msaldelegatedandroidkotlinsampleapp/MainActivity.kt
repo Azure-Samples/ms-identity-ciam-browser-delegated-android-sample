@@ -270,10 +270,11 @@ class MainActivity : AppCompatActivity() {
         return object : ISingleAccountPublicClientApplication.SignOutCallback {
             override fun onSignOut() {
                 currentAccount = null
+                updateUI(null)
             }
 
             override fun onError(exception: MsalException) {
-                TODO("Not yet implemented")
+                binding.txtLog.text = getString(R.string.exception_get_account) + exception
             }
         }
     }

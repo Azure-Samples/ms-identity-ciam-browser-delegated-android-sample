@@ -2,7 +2,7 @@
   "client_id" : "CLIENT_ID",
   "authorization_user_agent" : "DEFAULT",
   "redirect_uri" : "REDIRECT_URI",
-  "account_mode" : "MULTIPLE",
+  "account_mode" : "SINGLE",
   "broker_redirect_uri_registered": true,
   "authorities" : [
     {
