@@ -27,13 +27,13 @@ class MainActivity : AppCompatActivity() {
     private val binding get() = _binding!!
     /* MSAL Authentication Variables */
     private lateinit var authClient: ISingleAccountPublicClientApplication
-    private var currentAccount: IAccount? = null
+    private var account: IAccount? = null
     private var accessToken: String? = null
 
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val WEB_API_BASE_URL = "" // Developers should set the respective URL of their web API here
-        private const val scopes = ""
+        private const val scopes = "" // Developers should set the respective scopes of their web API here
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +50,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         initializeButtonListeners()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getAccount()
     }
 
     /**
@@ -74,6 +79,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
+     * Creates a PublicClientApplication object with res/raw/auth_config_ciam.json
+     */
+    private suspend fun initClient(): ISingleAccountPublicClientApplication = withContext(Dispatchers.IO) {
+        return@withContext PublicClientApplication.createSingleAccountPublicClientApplication(
+            this@MainActivity,
+            R.raw.auth_config_ciam
+        )
+    }
+
+    /**
      * Acquire token interactively. It will also create an account object for the silent call as a result (to be obtained by getAccount()).
      *
      * If acquireTokenSilent() returns an error that requires an interaction,
@@ -85,6 +100,11 @@ class MainActivity : AppCompatActivity() {
      */
     private fun acquireTokenInteractively() {
         binding.txtLog.text = ""
+
+        if (account != null) {
+            Toast.makeText(this, "An account is already signed in.", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         /* Extracts a scope array from text, i.e. from "User.Read User.ReadWrite" to ["user.read", "user.readwrite"] */
         val scopes = scopes.lowercase().split(" ")
@@ -106,7 +126,7 @@ class MainActivity : AppCompatActivity() {
     private fun acquireTokenSilently() {
         binding.txtLog.text = ""
 
-        if (currentAccount == null) {
+        if (account == null) {
             Toast.makeText(this, "No account available", Toast.LENGTH_SHORT).show()
             return
         }
@@ -114,8 +134,8 @@ class MainActivity : AppCompatActivity() {
         /* Extracts a scope array from text, i.e. from "User.Read User.ReadWrite" to ["user.read", "user.readwrite"] */
         val scopes = scopes.lowercase().split(" ")
         val parameters = AcquireTokenSilentParameters.Builder()
-            .forAccount(currentAccount)
-            .fromAuthority(currentAccount!!.authority)
+            .forAccount(account)
+            .fromAuthority(account!!.authority)
             .withScopes(scopes)
             .forceRefresh(false)
             .withCallback(getAuthSilentCallback())
@@ -139,7 +159,6 @@ class MainActivity : AppCompatActivity() {
 
         authClient.signOut(signOutCallback())
     }
-
 
     /**
      * Use the access token authenticated from Azure to access the Web API service that the developer configured himself.
@@ -165,7 +184,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Callback used in for silent acquireToken calls.
+     * Callback used for silent acquireToken calls.
      */
     private fun getAuthInteractiveCallback(): AuthenticationCallback {
         return object : AuthenticationCallback {
@@ -243,18 +262,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Callback used for async get current account call.
+     */
     private fun currentAccountCallback(): ISingleAccountPublicClientApplication.CurrentAccountCallback {
         return object : ISingleAccountPublicClientApplication.CurrentAccountCallback {
             override fun onAccountLoaded(activeAccount: IAccount?) {
                 if (activeAccount != null) {
-                    currentAccount = activeAccount
+                    account = activeAccount
                 }
-                updateUI(currentAccount)
+                updateUI(account)
             }
 
             override fun onAccountChanged(priorAccount: IAccount?, currentAccount: IAccount?) {
-                // Perform a cleanup task as the signed-in account changed.
-                updateUI(currentAccount)
+                if (currentAccount == null) {
+                    // Perform a cleanup task as the signed-in account changed.
+                    account = null
+                }
+                updateUI(account)
             }
 
             override fun onError(exception: MsalException) {
@@ -269,29 +294,19 @@ class MainActivity : AppCompatActivity() {
     private fun signOutCallback(): ISingleAccountPublicClientApplication.SignOutCallback {
         return object : ISingleAccountPublicClientApplication.SignOutCallback {
             override fun onSignOut() {
-                currentAccount = null
-                updateUI(null)
+                account = null
+                updateUI(account)
             }
 
             override fun onError(exception: MsalException) {
-                binding.txtLog.text = getString(R.string.exception_get_account) + exception
+                binding.txtLog.text = getString(R.string.exception_remove_account) + exception
             }
         }
     }
 
     /**
-     * Creates a PublicClientApplication object with res/raw/auth_config_ciam.json
-     */
-    private suspend fun initClient(): ISingleAccountPublicClientApplication = withContext(Dispatchers.IO) {
-        return@withContext PublicClientApplication.createSingleAccountPublicClientApplication(
-            this@MainActivity,
-            R.raw.auth_config_ciam
-        )
-    }
-
-    /**
      * Helper methods manage UI updates
-     * updateUI() - Updates UI based on account list
+     * updateUI() - Updates UI based on account
      */
     private fun updateUI(account: IAccount?) {
         if (account != null) {
