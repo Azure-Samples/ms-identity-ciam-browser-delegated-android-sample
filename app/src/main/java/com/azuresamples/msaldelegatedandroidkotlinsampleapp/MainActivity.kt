@@ -2,7 +2,6 @@ package com.azuresamples.msaldelegatedandroidkotlinsampleapp
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.azuresamples.msaldelegatedandroidkotlinsampleapp.databinding.ActivityMainBinding
@@ -11,7 +10,7 @@ import com.microsoft.identity.client.AcquireTokenSilentParameters
 import com.microsoft.identity.client.AuthenticationCallback
 import com.microsoft.identity.client.IAccount
 import com.microsoft.identity.client.IAuthenticationResult
-import com.microsoft.identity.client.IMultipleAccountPublicClientApplication
+import com.microsoft.identity.client.ISingleAccountPublicClientApplication
 import com.microsoft.identity.client.PublicClientApplication
 import com.microsoft.identity.client.SilentAuthenticationCallback
 import com.microsoft.identity.client.exception.MsalClientException
@@ -27,13 +26,14 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
     /* Azure AD Variables */
-    private lateinit var authClient: IMultipleAccountPublicClientApplication
-    private lateinit var accountList: List<IAccount>
+    private lateinit var authClient: ISingleAccountPublicClientApplication
+    private var currentAccount: IAccount? = null
     private var accessToken: String? = null
 
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val WEB_API_BASE_URL = "" // Developers should set the respective URL of their web API here
+        private const val scopes = ""
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +46,7 @@ class MainActivity : AppCompatActivity() {
         /* Creates a PublicClientApplication object and load currently signed-in accounts. */
         CoroutineScope(Dispatchers.Main).launch {
             authClient = initClient()
-            accountList = getAccounts()
-            updateUI(accountList)
+            getAccount()
         }
 
         initializeButtonListeners()
@@ -87,8 +86,8 @@ class MainActivity : AppCompatActivity() {
     private fun acquireTokenInteractively() {
         binding.txtLog.text = ""
 
-        /* Extracts a scope array from a text field, i.e. from "User.Read User.ReadWrite" to ["user.read", "user.readwrite"] */
-        val scopes = binding.scope.text.toString().lowercase().split(" ")
+        /* Extracts a scope array from text, i.e. from "User.Read User.ReadWrite" to ["user.read", "user.readwrite"] */
+        val scopes = scopes.lowercase().split(" ")
         val parameters = AcquireTokenParameters.Builder()
             .startAuthorizationFromActivity(this@MainActivity)
             .withScopes(scopes)
@@ -107,12 +106,16 @@ class MainActivity : AppCompatActivity() {
     private fun acquireTokenSilently() {
         binding.txtLog.text = ""
 
-        /* Extracts a scope array from a text field, i.e. from "User.Read User.ReadWrite" to ["user.read", "user.readwrite"] */
-        val scopes = binding.scope.text.toString().lowercase().split(" ")
-        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
+        if (currentAccount == null) {
+            Toast.makeText(this, "No account available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        /* Extracts a scope array from text, i.e. from "User.Read User.ReadWrite" to ["user.read", "user.readwrite"] */
+        val scopes = scopes.lowercase().split(" ")
         val parameters = AcquireTokenSilentParameters.Builder()
-            .forAccount(selectedAccount)
-            .fromAuthority(selectedAccount.authority)
+            .forAccount(currentAccount)
+            .fromAuthority(currentAccount!!.authority)
             .withScopes(scopes)
             .forceRefresh(false)
             .withCallback(getAuthSilentCallback())
@@ -122,14 +125,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
+     * Load currently signed-in accounts, if there's any.
+     */
+    private fun getAccount() {
+        authClient.getCurrentAccountAsync(currentAccountCallback())
+    }
+
+    /**
      * Removes the selected account and cached tokens from this app (or device, if the device is in shared mode).
      */
     private fun removeAccount() {
         binding.txtLog.text = ""
 
-        val selectedAccount: IAccount = accountList[binding.accountList.selectedItemPosition]
-
-        authClient.removeAccount(selectedAccount, removeAccountCallback())
+        authClient.signOut(signOutCallback())
     }
 
 
@@ -170,9 +178,8 @@ class MainActivity : AppCompatActivity() {
                 /* Reload account asynchronously to get the up-to-date list. */
                 CoroutineScope(Dispatchers.Main).launch {
                     accessToken = authenticationResult.accessToken
-                    accountList = getAccounts()
+                    getAccount()
 
-                    updateUI(accountList)
                     binding.txtLog.text = getString(R.string.log_token_interactive) +  accessToken
                 }
             }
@@ -236,53 +243,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Callback used in for removing accounts from cache.
-     */
-    private fun removeAccountCallback(): IMultipleAccountPublicClientApplication.RemoveAccountCallback {
-        return object : IMultipleAccountPublicClientApplication.RemoveAccountCallback {
-            override fun onRemoved() {
-                /* Reload account asynchronously to get the up-to-date list. */
-                CoroutineScope(Dispatchers.Main).launch {
-                    accessToken = null
-                    accountList = getAccounts()
-
-                    updateUI(accountList)
-                    Toast.makeText(this@MainActivity, getString(R.string.exception_remove_account), Toast.LENGTH_SHORT).show()
+    private fun currentAccountCallback(): ISingleAccountPublicClientApplication.CurrentAccountCallback {
+        return object : ISingleAccountPublicClientApplication.CurrentAccountCallback {
+            override fun onAccountLoaded(activeAccount: IAccount?) {
+                if (activeAccount != null) {
+                    currentAccount = activeAccount
                 }
+                updateUI(currentAccount)
+            }
+
+            override fun onAccountChanged(priorAccount: IAccount?, currentAccount: IAccount?) {
+                // Perform a cleanup task as the signed-in account changed.
+                updateUI(currentAccount)
             }
 
             override fun onError(exception: MsalException) {
-                accessToken = null
-                binding.txtLog.text = getString(R.string.exception_remove_account) + exception
+                binding.txtLog.text = getString(R.string.exception_get_account) + exception
             }
         }
+    }
 
+    /**
+     * Callback used in for signing out accounts from cache.
+     */
+    private fun signOutCallback(): ISingleAccountPublicClientApplication.SignOutCallback {
+        return object : ISingleAccountPublicClientApplication.SignOutCallback {
+            override fun onSignOut() {
+                currentAccount = null
+            }
+
+            override fun onError(exception: MsalException) {
+                TODO("Not yet implemented")
+            }
+        }
     }
 
     /**
      * Creates a PublicClientApplication object with res/raw/auth_config_ciam.json
      */
-    private suspend fun initClient(): IMultipleAccountPublicClientApplication = withContext(Dispatchers.IO) {
-        return@withContext PublicClientApplication.createMultipleAccountPublicClientApplication(
+    private suspend fun initClient(): ISingleAccountPublicClientApplication = withContext(Dispatchers.IO) {
+        return@withContext PublicClientApplication.createSingleAccountPublicClientApplication(
             this@MainActivity,
             R.raw.auth_config_ciam
         )
     }
 
     /**
-     * Load currently signed-in accounts, if there's any.
-     */
-    private suspend fun getAccounts(): List<IAccount> = withContext(Dispatchers.IO) {
-        return@withContext authClient.accounts
-    }
-
-    /**
      * Helper methods manage UI updates
      * updateUI() - Updates UI based on account list
      */
-    private fun updateUI(accounts : List<IAccount>) {
-        if (accounts.isNotEmpty()) {
+    private fun updateUI(account: IAccount?) {
+        if (account != null) {
             binding.btnRemoveAccount.isEnabled = true
             binding.btnAccessApi.isEnabled = true
             binding.btnAcquireTokenSilently.isEnabled = true
@@ -293,14 +304,5 @@ class MainActivity : AppCompatActivity() {
             binding.btnAcquireTokenSilently.isEnabled = true
             binding.btnAcquireTokenInteractively.isEnabled = true
         }
-
-        val dataAdapter = ArrayAdapter(
-            this, android.R.layout.simple_spinner_item,
-            accounts.map { it.username }.toMutableList()
-        )
-
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.accountList.adapter = dataAdapter
-        dataAdapter.notifyDataSetChanged()
     }
 }

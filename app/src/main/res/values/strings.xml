@@ -11,5 +11,6 @@
 
     <string name="exception_web_api">Exception at accessing web API:</string>
     <string name="exception_authentication">Authentication failed:</string>
+    <string name="exception_get_account">MSAL Exception:</string>
     <string name="exception_remove_account">MSAL Exception:</string>
 </resources>
