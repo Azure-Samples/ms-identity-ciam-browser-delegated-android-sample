@@ -6,117 +6,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id ="@+id/scope_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/dimens_5dp"
-            android:paddingBottom="@dimen/dimens_5dp"
-            android:paddingLeft="@dimen/dimens_15dp"
-            android:paddingStart="@dimen/dimens_15dp"
-            android:weightSum="10"
-            app:layout_constraintTop_toTopOf="parent" >
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="3"
-                android:text="Scope"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/btn_acquireTokenInteractively"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dimens_60dp"
+            android:layout_marginTop="@dimen/dimens_5dp"
+            android:layout_marginStart="@dimen/dimens_5dp"
+            android:layout_marginLeft="@dimen/dimens_5dp"
+            android:enabled="false"
+            android:text="Acquire Token Interactively"
+            app:layout_constraintEnd_toStartOf="@+id/btn_acquireTokenSilently"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="7"
-                android:orientation="vertical">
-
-                <EditText
-                    android:id="@+id/scope"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="@dimen/dimens_48dp"
-                    android:text="user.read"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/dimens_5dp"
-                    android:text="Type in scopes delimited by space"
-                    android:textSize="10sp" />
-
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/account_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/dimens_5dp"
-            android:paddingBottom="@dimen/dimens_5dp"
-            android:paddingLeft="@dimen/dimens_15dp"
-            android:paddingStart="@dimen/dimens_15dp"
-            android:weightSum="10"
-            app:layout_constraintTop_toBottomOf="@id/scope_layout" >
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="Accounts"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:id="@+id/account_list"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="7"
-                android:minHeight="@dimen/dimens_48dp"
-                android:spinnerMode="dropdown" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/token_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/account_layout">
-
-            <Button
-                android:id="@+id/btn_acquireTokenInteractively"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:enabled="false"
-                android:text="Acquire Token Interactively" />
-
-            <Button
+        <Button
                 android:id="@+id/btn_acquireTokenSilently"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="5"
+                android:layout_height="@dimen/dimens_60dp"
+                android:layout_marginTop="@dimen/dimens_5dp"
+                android:layout_marginEnd="@dimen/dimens_5dp"
+                android:layout_marginRight="@dimen/dimens_5dp"
                 android:enabled="false"
-                android:text="Acquire Token Silently" />
-        </LinearLayout>
+                android:text="Acquire Token Silently"
+                app:layout_constraintStart_toEndOf="@+id/btn_acquireTokenInteractively"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
 
 
         <Button
             android:id="@+id/btn_removeAccount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimens_5dp"
+            android:layout_marginHorizontal="@dimen/dimens_5dp"
             android:enabled="false"
             android:gravity="center"
             android:text="Remove Account"
-            app:layout_constraintTop_toBottomOf="@id/token_layout"
+            app:layout_constraintTop_toBottomOf="@id/btn_acquireTokenInteractively"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -124,6 +55,8 @@
             android:id="@+id/btn_accessApi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimens_5dp"
+            android:layout_marginHorizontal="@dimen/dimens_5dp"
             android:enabled="false"
             android:gravity="center"
             android:text="API - Perform GET"
@@ -136,6 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimens_20dp"
+            android:layout_marginLeft="@dimen/dimens_15dp"
             android:layout_weight="0.8"
             android:text="Output goes here..."
             app:layout_constraintTop_toBottomOf="@id/btn_accessApi" />
