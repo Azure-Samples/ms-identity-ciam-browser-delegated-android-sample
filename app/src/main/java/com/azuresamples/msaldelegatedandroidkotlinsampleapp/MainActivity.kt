@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
      *
      * Some example scenarios are
      *  - password change
-     *  - you're introducing a new scope which the user has never consented for.
+     *  - you're introducing a new scope which the user has never consented to.
      */
     private fun acquireTokenInteractively() {
         binding.txtLog.text = ""
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Use the access token authenticated from Azure to access the Web API service that the developer configured himself.
+     * Use the access token authenticated from Azure to access the Web API services configured by developers themselves.
      */
     private fun accessWebApi() {
         CoroutineScope(Dispatchers.Main).launch {
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 binding.txtLog.text = getString(R.string.log_web_api_response)  + apiResponse.toString()
             } catch (exception: Exception) {
-                Log.d(TAG, "Exception at accessing web API: $exception")
+                Log.d(TAG, "Exception while accessing web API: $exception")
 
                 binding.txtLog.text = getString(R.string.exception_web_api) + exception
             }
