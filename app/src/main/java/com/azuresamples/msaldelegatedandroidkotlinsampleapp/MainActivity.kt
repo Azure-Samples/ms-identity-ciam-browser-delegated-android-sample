@@ -152,10 +152,10 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, getString(R.string.message_web_base_url), Toast.LENGTH_LONG).show()
                     return@launch
                 }
-                val apiResponseCode = withContext(Dispatchers.IO) {
+                val apiResponse = withContext(Dispatchers.IO) {
                     ApiClient.performGetApiRequest(WEB_API_BASE_URL, accessToken)
                 }
-                binding.txtLog.text = getString(R.string.log_web_api_response)  + apiResponseCode
+                binding.txtLog.text = getString(R.string.log_web_api_response)  + apiResponse.toString()
             } catch (exception: Exception) {
                 Log.d(TAG, "Exception at accessing web API: $exception")
 
