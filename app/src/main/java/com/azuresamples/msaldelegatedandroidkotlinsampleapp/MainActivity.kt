@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
-    /* Azure AD Variables */
+    /* MSAL Authentication Variables */
     private lateinit var authClient: ISingleAccountPublicClientApplication
     private var currentAccount: IAccount? = null
     private var accessToken: String? = null
