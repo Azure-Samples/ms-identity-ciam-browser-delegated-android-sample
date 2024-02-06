@@ -310,6 +310,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun updateUI(account: IAccount?) {
         if (account != null) {
+            binding.userName.text = account.username
             binding.btnRemoveAccount.isEnabled = true
             binding.btnAccessApi.isEnabled = true
             binding.btnAcquireTokenSilently.isEnabled = true
