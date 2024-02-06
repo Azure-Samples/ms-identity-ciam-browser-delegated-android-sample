@@ -148,13 +148,16 @@ class MainActivity : AppCompatActivity() {
      * Load currently signed-in accounts, if there's any.
      */
     private fun getAccount() {
-        authClient.getCurrentAccountAsync(currentAccountCallback())
+       if (::authClient.isInitialized) {
+           authClient.getCurrentAccountAsync(currentAccountCallback())
+       }
     }
 
     /**
      * Removes the selected account and cached tokens from this app (or device, if the device is in shared mode).
      */
     private fun removeAccount() {
+        binding.userName.text = ""
         binding.txtLog.text = ""
 
         authClient.signOut(signOutCallback())
