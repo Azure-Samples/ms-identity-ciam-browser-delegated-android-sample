@@ -148,13 +148,16 @@ class MainActivity : AppCompatActivity() {
      * Load currently signed-in accounts, if there's any.
      */
     private fun getAccount() {
-        authClient.getCurrentAccountAsync(currentAccountCallback())
+       if (::authClient.isInitialized) {
+           authClient.getCurrentAccountAsync(currentAccountCallback())
+       }
     }
 
     /**
      * Removes the selected account and cached tokens from this app (or device, if the device is in shared mode).
      */
     private fun removeAccount() {
+        binding.userName.text = ""
         binding.txtLog.text = ""
 
         authClient.signOut(signOutCallback())
@@ -310,6 +313,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun updateUI(account: IAccount?) {
         if (account != null) {
+            binding.userName.text = account.username
             binding.btnRemoveAccount.isEnabled = true
             binding.btnAccessApi.isEnabled = true
             binding.btnAcquireTokenSilently.isEnabled = true
