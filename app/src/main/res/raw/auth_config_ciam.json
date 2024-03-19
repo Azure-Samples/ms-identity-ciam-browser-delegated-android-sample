@@ -1,13 +1,13 @@
 {
-  "client_id" : "CLIENT_ID",
+  "client_id" : "Enter_the_Application_Id_Here",
   "authorization_user_agent" : "DEFAULT",
-  "redirect_uri" : "REDIRECT_URI",
+  "redirect_uri" : "Enter_the_Redirect_Uri_Here",
   "account_mode" : "SINGLE",
   "broker_redirect_uri_registered": true,
   "authorities" : [
     {
       "type": "CIAM",
-      "authority_url": "https://TENANT_NAME.ciamlogin.com/TENANT_NAME.onmicrosoft.com/"
+      "authority_url": "https://Enter_the_Tenant_Subdomain_Here.ciamlogin.com/Enter_the_Tenant_Subdomain_Here.onmicrosoft.com/"
     }
   ]
 }
