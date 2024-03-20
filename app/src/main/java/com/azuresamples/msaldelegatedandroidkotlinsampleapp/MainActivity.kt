@@ -33,7 +33,11 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val WEB_API_BASE_URL = "" // Developers should set the respective URL of their web API here
-        private const val scopes = "" // Developers should set the respective scopes of their web API here
+        /**
+         * Developers should set the scopes here. Multiple scopes are separated by spaces. For example. "user.read user.readwrite"
+         * Developers should add extra respective scopes of their web API here if they want to access the web API.
+         */
+        private const val scopes = ""
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
