@@ -3,7 +3,6 @@
   "authorization_user_agent" : "DEFAULT",
   "redirect_uri" : "Enter_the_Redirect_Uri_Here",
   "account_mode" : "SINGLE",
-  "broker_redirect_uri_registered": true,
   "authorities" : [
     {
       "type": "CIAM",
