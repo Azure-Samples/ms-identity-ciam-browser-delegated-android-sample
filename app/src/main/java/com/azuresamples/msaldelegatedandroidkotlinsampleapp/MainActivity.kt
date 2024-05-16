@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val WEB_API_BASE_URL = "" // Developers should set the respective URL of their web API here
-        private const val scopes = "" // Developers should set the respective scopes of their web API here
+        private const val scopes = "" // Developers should append the respective scopes of their web API with delegated permission to Microsoft Graph here
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -273,6 +273,7 @@ class MainActivity : AppCompatActivity() {
             override fun onAccountLoaded(activeAccount: IAccount?) {
                 if (activeAccount != null) {
                     account = activeAccount
+
                 }
                 updateUI(account)
             }
